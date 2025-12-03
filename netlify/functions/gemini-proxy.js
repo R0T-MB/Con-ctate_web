@@ -2,7 +2,7 @@
 
 export default async (req, context) => {
   // La forma correcta de leer la variable de entorno en funciones modernas de Netlify
-  const apiKey = Netlify.env.get('GEMINI_API_KEY');
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     return new Response(
