@@ -5,8 +5,12 @@
 [dev]
   command = "npm run dev"
 
-[build.environment]
-  SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_ANON_KEY,VITE_SUPABASE_URL,VITE_GEMINI_API_KEY"
-
+# ESTA ES LA SECCIÓN CLAVE PARA LAS FUNCIONES
 [functions]
   directory = "netlify/functions"
+
+# Las redirecciones que ya tenías
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
