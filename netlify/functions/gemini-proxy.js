@@ -1,7 +1,7 @@
 // netlify/functions/gemini-proxy.js
 
 export default async (req, context) => {
-  // Usamos el nuevo objeto Request y leemos la variable de entorno sin el prefijo VITE_
+  // La forma correcta de leer la variable de entorno en funciones modernas de Netlify
   const apiKey = Netlify.env.get('GEMINI_API_KEY');
 
   if (!apiKey) {
