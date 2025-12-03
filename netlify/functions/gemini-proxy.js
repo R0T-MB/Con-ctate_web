@@ -1,33 +1,31 @@
 // netlify/functions/gemini-proxy.js
-import fetch from 'node-fetch';
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async (req, context) => {
+  // Usamos el nuevo objeto Request y leemos la variable de entorno sin el prefijo VITE_
+  const apiKey = Netlify.env.get('GEMINI_API_KEY');
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+  if (!apiKey) {
+    return new Response(
+      JSON.stringify({ error: 'API key not configured on the server' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return new Response(
+      JSON.stringify({ error: 'Method Not Allowed' }),
+      { status: 405, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   try {
-    const apiKey = process.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'API key not configured on the server' });
-    }
+    const { prompt } = await req.json();
+    const MODEL_NAME = 'gemini-2.5-flash';
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
 
-    const { prompt } = req.body;
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
       }),
@@ -36,13 +34,22 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json(data);
+      return new Response(JSON.stringify(data), {
+        status: response.status,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    return res.status(200).json(data);
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
 
   } catch (error) {
     console.error('Error in Gemini proxy function:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return new Response(
+      JSON.stringify({ error: 'Internal Server Error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
-}
+};
