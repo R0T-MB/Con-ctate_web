@@ -1,5 +1,5 @@
 // src/services/iaService.js
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+
 
 // Usamos el modelo correcto que encontramos en la lista
 const MODEL_NAME = 'gemini-2.5-flash';
@@ -176,22 +176,20 @@ export const consultarIa = async (pregunta, info, language) => {
     return { success: false, error: 'Por favor, escribe una pregunta.' };
   }
 
-  if (!API_KEY) {
-    return { success: false, error: 'La clave de API de Gemini no está configurada. Revisa tu archivo .env' };
-  }
-
   const currentPromptConfig = promptConfig[language] || promptConfig.es;
-  
-  const contextoPersonal = info
-    .filter(item => (item.respuesta || '').trim() !== '') 
+
+  // Evitar errores si info no es un array
+  const safeInfo = Array.isArray(info) ? info : [];
+
+  const contextoPersonal = safeInfo
+    .filter(item => (item.respuesta || '').trim() !== '')
     .map(item => `- ${item.pregunta}: ${item.respuesta}`)
     .join('\n');
 
-  let systemPrompt = currentPromptConfig.systemPrompt;
-  systemPrompt = systemPrompt.replace('{{INFO}}', contextoPersonal);
-  systemPrompt = systemPrompt.replace('{{PREGUNTA}}', pregunta);
+  let systemPrompt = currentPromptConfig.systemPrompt
+    .replace('{{INFO}}', contextoPersonal)
+    .replace('{{PREGUNTA}}', pregunta);
 
-  // --- NUEVO: CONTAR LOS TOKENS DE ENTRADA ---
   const inputTokens = countTokens(systemPrompt);
 
   try {
@@ -205,13 +203,23 @@ export const consultarIa = async (pregunta, info, language) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error.message || 'Error en la API de Gemini');
+      throw new Error(errorData.error?.message || 'Error en la API de Gemini');
     }
 
     const data = await response.json();
-    let respuesta = data.candidates[0].content.parts[0].text.trim();
 
-    // --- NUEVO: CONTAR LOS TOKENS DE SALIDA ---
+    // Validaciones robustas para evitar app en blanco
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new Error("La IA no devolvió respuesta.");
+    }
+
+    const parts = data.candidates[0].content?.parts;
+    if (!parts || !parts[0]?.text) {
+      throw new Error("La respuesta de la IA llegó en un formato inesperado.");
+    }
+
+    let respuesta = parts[0].text.trim();
+
     const outputTokens = countTokens(respuesta);
     const totalTokens = inputTokens + outputTokens;
 
@@ -219,11 +227,10 @@ export const consultarIa = async (pregunta, info, language) => {
       respuesta += currentPromptConfig.finalQuestion;
     }
 
-    // --- NUEVO: DEVOLVEMOS EL CONTEO DE TOKENS ---
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: respuesta,
-      tokenUsage: { // <-- NUEVO OBJETO
+      tokenUsage: {
         input: inputTokens,
         output: outputTokens,
         total: totalTokens,
