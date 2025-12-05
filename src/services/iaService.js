@@ -1,15 +1,5 @@
-// src/services/iaService.js
-
-
-// Usamos el modelo correcto que encontramos en la lista
-const MODEL_NAME = 'gemini-2.5-flash';
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-
-// --- NUEVO: FUNCIÓN PARA CONTAR TOKENS ---
-// Es una aproximación, pero muy útil para controlar costos.
 const countTokens = (text) => {
   if (!text) return 0;
-  // Regla general: 1 token ≈ 4 caracteres. Usamos 4 para ser conservadores.
   return Math.ceil(text.length / 4);
 };
 
@@ -177,48 +167,35 @@ export const consultarIa = async (pregunta, info, language) => {
   }
 
   const currentPromptConfig = promptConfig[language] || promptConfig.es;
-
-  // Evitar errores si info no es un array
-  const safeInfo = Array.isArray(info) ? info : [];
-
-  const contextoPersonal = safeInfo
-    .filter(item => (item.respuesta || '').trim() !== '')
+  
+  const contextoPersonal = info
+    .filter(item => (item.respuesta || '').trim() !== '') 
     .map(item => `- ${item.pregunta}: ${item.respuesta}`)
     .join('\n');
 
-  let systemPrompt = currentPromptConfig.systemPrompt
-    .replace('{{INFO}}', contextoPersonal)
-    .replace('{{PREGUNTA}}', pregunta);
+  let systemPrompt = currentPromptConfig.systemPrompt;
+  systemPrompt = systemPrompt.replace('{{INFO}}', contextoPersonal);
+  systemPrompt = systemPrompt.replace('{{PREGUNTA}}', pregunta);
 
   const inputTokens = countTokens(systemPrompt);
 
   try {
-    const response = await fetch(API_URL, {
+    // ESTA ES LA LÍNEA MÁS IMPORTANTE: LLAMA A LA FUNCIÓN DE NETLIFY
+    const response = await fetch('/.netlify/functions/gemini-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt }] }],
+        prompt: systemPrompt,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Error en la API de Gemini');
+      throw new Error(errorData.error || 'Error al contactar la función de Netlify');
     }
 
     const data = await response.json();
-
-    // Validaciones robustas para evitar app en blanco
-    if (!data.candidates || data.candidates.length === 0) {
-      throw new Error("La IA no devolvió respuesta.");
-    }
-
-    const parts = data.candidates[0].content?.parts;
-    if (!parts || !parts[0]?.text) {
-      throw new Error("La respuesta de la IA llegó en un formato inesperado.");
-    }
-
-    let respuesta = parts[0].text.trim();
+    let respuesta = data.candidates[0].content.parts[0].text.trim();
 
     const outputTokens = countTokens(respuesta);
     const totalTokens = inputTokens + outputTokens;
@@ -227,8 +204,8 @@ export const consultarIa = async (pregunta, info, language) => {
       respuesta += currentPromptConfig.finalQuestion;
     }
 
-    return {
-      success: true,
+    return { 
+      success: true, 
       data: respuesta,
       tokenUsage: {
         input: inputTokens,
@@ -238,7 +215,7 @@ export const consultarIa = async (pregunta, info, language) => {
     };
 
   } catch (error) {
-    console.error("Error al contactar a Gemini:", error);
+    console.error("Error al contactar a la función de Netlify:", error);
     return { success: false, error: `Error: ${error.message}` };
   }
 };
