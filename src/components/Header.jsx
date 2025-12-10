@@ -6,17 +6,25 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Button from './ui/button';
-import MobileMenu from './MobileMenu'; // <-- IMPORTAR EL NUEVO MENÚ
+import MobileMenu from './MobileMenu';
 import LanguageSelector from './LanguageSelector';
+import { useSound } from '../hooks/useSound'; // <-- IMPORTAR EL HOOK
 
 function Header() {
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // <-- NUEVO ESTADO
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // <-- USAR EL HOOK para el sonido de logout
+  // Asegúrate de tener un archivo de sonido en esta ruta (ej: public/sounds/logout.mp3)
+  const { play: playLogoutSound } = useSound('/sounds/logout.mp3');
 
   const handleLogout = () => {
+    // <-- REPRODUCIR SONIDO AL CERRAR SESIÓN
+    playLogoutSound();
+    
     logout();
     navigate('/');
   };

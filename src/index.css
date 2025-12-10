@@ -24,3 +24,48 @@ html, body {
     background-color: #111827;
   }
 }
+
+/* Ocultar scrollbar pero mantener funcionalidad */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Estilos adicionales para mejorar la experiencia de deslizamiento */
+.scroll-container {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Mejora el deslizamiento en iOS */
+}
+
+/* Indicadores de deslizamiento */
+.scroll-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 32px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.scroll-indicator-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(255,255,255,1), rgba(255,255,255,0));
+}
+
+.scroll-indicator-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0));
+}
+
+@media (prefers-color-scheme: dark) {
+  .scroll-indicator-left {
+    background: linear-gradient(to right, rgba(17,24,39,1), rgba(17,24,39,0));
+  }
+  
+  .scroll-indicator-right {
+    background: linear-gradient(to left, rgba(17,24,39,1), rgba(17,24,39,0));
+  }
+}
