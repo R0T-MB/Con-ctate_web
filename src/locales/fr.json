@@ -139,8 +139,11 @@
 },
   "recoverPassword": {
   "title": "Réinitialiser le mot de passe",
-  "newPasswordLabel": "Saisissez votre nouveau mot de passe",
+  "label": "Entrez votre nouveau mot de passe",
+  "confirmLabel": "Confirmez le nouveau mot de passe",
   "button": "Réinitialiser le mot de passe",
+  "mismatch": "Les mots de passe ne correspondent pas.",
+  "success": "Votre mot de passe a été réinitialisé avec succès ! Vous pouvez maintenant vous connecter.",
   "backToLogin": "Retour à la connexion"
 },
 "general": {

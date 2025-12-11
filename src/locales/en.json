@@ -141,8 +141,10 @@
 },
   "recoverPassword": {
   "title": "Reset Password",
-  "newPasswordLabel": "Enter your new password",
+  "label": "Enter your new password",
   "button": "Reset Password",
+  "mismatch": "Passwords do not match.",
+  "success": "Your password has been successfully reset! You can now log in.",
   "backToLogin": "Back to login"
 },
 "general": {

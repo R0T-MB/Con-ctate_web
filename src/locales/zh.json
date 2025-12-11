@@ -139,9 +139,12 @@
   "backToLogin": "返回登录"
 },
   "recoverPassword": {
-  "title": "重置密码",
-  "newPasswordLabel": "输入你的新密码",
+  "title": "设置新密码",
+  "label": "新密码",
+  "confirmLabel": "确认新密码",
   "button": "重置密码",
+  "mismatch": "密码不匹配。",
+  "success": "你的密码已成功重置！你现在可以登录了。",
   "backToLogin": "返回登录"
 },
 "general": {

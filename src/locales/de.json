@@ -138,9 +138,12 @@
   "backToLogin": "Zurück zur Anmeldung"
 },
   "recoveryPassword": {
-  "title": "Passwort zurücksetzen",
-  "newPasswordLabel": "Gib dein neues Passwort ein",
+  "title": "Neues Passwort festlegen",
+  "label": "Neues Passwort",
+  "confirmLabel": "Neues Passwort bestätigen",
   "button": "Passwort zurücksetzen",
+  "mismatch": "Die Passwörter stimmen nicht überein.",
+  "success": "Dein Passwort wurde erfolgreich zurückgesetzt! Du kannst dich jetzt anmelden.",
   "backToLogin": "Zurück zur Anmeldung"
 },
 "general": {

@@ -139,8 +139,11 @@
 },
   "recoverPassword": {
   "title": "Reimposta Password",
-  "newPasswordLabel": "Inserisci la tua nuova password",
+  "label": "Nuova Password",
+  "confirmLabel": "Conferma Nuova Password",
   "button": "Reimposta Password",
+  "mismatch": "Le password non corrispondono.",
+  "success": "La tua password è stata reimpostata con successo! Ora puoi accedere.",
   "backToLogin": "Torna al login"
 },
 "general": {

@@ -142,8 +142,11 @@
   },
   "recoverPassword": {
     "title": "Restablecer Contraseña",
-    "newPasswordLabel": "Introduce tu nueva contraseña",
+    "label": "Nueva Contraseña",
+    "confirmLabel": "Confirmar Nueva Contraseña",
     "button": "Restablecer Contraseña",
+    "mismatch": "Las contraseñas no coinciden.",
+    "success": "¡Tu contraseña ha sido restablecida con éxito! Ya puedes iniciar sesión.",
     "backToLogin": "Volver al inicio de sesión"
   },
   "general": {
