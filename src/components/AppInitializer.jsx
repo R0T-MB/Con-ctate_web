@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import toast, { Toaster } from 'react-hot-toast';
+import { I18nextProvider } from 'react-i18next'; // <-- 1. IMPORTA EL PROVEEDOR
+import i18n from '../i18n'; // <-- 2. IMPORTA TU INSTANCIA DE I18N
 
 // Importa TODOS tus componentes de página
 import LoginPage from './auth/LoginPage';
@@ -12,10 +14,10 @@ import RegisterPage from './auth/RegisterPage';
 import ForgotPasswordPage from './auth/ForgotPasswordPage';
 import LandingPage from './LandingPage';
 import MainLayout from './MainLayout';
-import TestRoute from '../TestRoute'; // Asegúrate que la ruta es correcta
-import TestDestination from '../TestDestination'; // Asegúrate que la ruta es correcta
+import TestRoute from '../TestRoute';
+import TestDestination from '../TestDestination';
 import RegistrationSuccessPage from './auth/RegistrationSuccessPage';
-import ResetPasswordPage from './auth/ResetPasswordPage'; // <-- YA ESTABA IMPORTADO
+import ResetPasswordPage from './auth/ResetPasswordPage';
 
 // Componente para proteger rutas (sin cambios)
 const ProtectedRoute = ({ children }) => {
@@ -29,7 +31,7 @@ const ProtectedRoute = ({ children }) => {
     return children;
 };
 
-// Componente para la pantalla de carga de confirmación
+// Componente para la pantalla de carga de confirmación (sin cambios)
 const ConfirmationScreen = () => (
   <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
     <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
@@ -37,7 +39,7 @@ const ConfirmationScreen = () => (
   </div>
 );
 
-// Este componente contiene la lógica principal
+// Este componente contiene la lógica principal (sin cambios)
 function AppContent() {
     const navigate = useNavigate();
     const [isConfirming, setIsConfirming] = useState(false);
@@ -70,8 +72,7 @@ function AppContent() {
                 }).finally(() => {
                     setIsConfirming(false);
                 });
-            } else if (type === 'recovery' && accessToken) { // <-- BLOQUE AÑADIDO PARA RECUPERACIÓN
-                // Es un enlace de recuperación de contraseña
+            } else if (type === 'recovery' && accessToken) {
                 console.log('¡Enlace de recuperación detectado!');
                 const toastId = toast.loading('Verificando tu acceso...');
                 
@@ -81,7 +82,6 @@ function AppContent() {
                 }).then(({ error }) => {
                     if (!error) {
                         console.log('Sesión de recuperación establecida con éxito.');
-                        // Sesión temporal establecida, redirige a la página de reseteo
                         toast.success('Acceso verificado. Por favor, introduce tu nueva contraseña.', { id: toastId });
                         navigate('/reset-password');
                         console.log('Intentando navegar a /reset-password...');
@@ -111,7 +111,7 @@ function AppContent() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* <-- RUTA AÑADIDA */}
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-route" element={<TestRoute />} />
             <Route path="/test-destination" element={<TestDestination />} />
             <Route path="/registration-success" element={<RegistrationSuccessPage />} />
@@ -125,10 +125,10 @@ function AppContent() {
     );
 }
 
-// El componente principal que exportamos, envuelve el contenido en el Router
+// El componente principal que exportamos, ahora envuelve TODO en el proveedor
 function AppInitializer() {
     return (
-        <>
+        <I18nextProvider i18n={i18n}> {/* <-- 3. ENVUELVE EL ROUTER Y EL TOASTER */}
             <Router>
                 <AppContent />
             </Router>
@@ -141,7 +141,7 @@ function AppInitializer() {
                     error: { duration: 5000, iconTheme: { primary: '#ef4444', secondary: '#fff' } },
                 }}
             />
-        </>
+        </I18nextProvider>
     );
 }
 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import LanguageSelector from '../LanguageSelector'; // <-- 1. IMPORTA EL COMPONENTE
+import LanguageSelector from '../LanguageSelector';
 
 function ResetPasswordPage() {
   console.log('¡El componente ResetPasswordPage se ha cargado!');
@@ -55,13 +55,13 @@ function ResetPasswordPage() {
   };
 
   return (
-  <div className="relative flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
-    {/* <-- CAMBIO AQUÍ: Versión de depuración para asegurar que sea visible */}
-    <div className="absolute top-4 right-4 z-50 p-2 bg-red-500"> 
-      <LanguageSelector className="bg-white dark:bg-gray-800 shadow-md rounded-lg" />
-    </div>
+    <div className="relative flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* <-- VERSIÓN LIMPIA DEL SELECTOR DE IDIOMA */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md rounded-lg" />
+      </div>
 
-    <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             {t('passwordRecovery.title', 'Restablecer Contraseña')}
