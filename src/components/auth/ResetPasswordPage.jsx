@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next'; // <-- 1. AÑADE LA IMPORTACIÓN
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../LanguageSelector'; // <-- 1. IMPORTA EL COMPONENTE
 
 function ResetPasswordPage() {
   console.log('¡El componente ResetPasswordPage se ha cargado!');
-  const { t } = useTranslation(); // <-- 2. INICIALIZA EL HOOK
+  const { t } = useTranslation();
   
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -54,19 +55,24 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+  <div className="relative flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    {/* <-- CAMBIO AQUÍ: Versión de depuración para asegurar que sea visible */}
+    <div className="absolute top-4 right-4 z-50 p-2 bg-red-500"> 
+      <LanguageSelector className="bg-white dark:bg-gray-800 shadow-md rounded-lg" />
+    </div>
+
+    <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             {t('passwordRecovery.title', 'Restablecer Contraseña')}
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             {t('passwordRecovery.description', 'Por favor, introduce tu nueva contraseña.')}
           </p>
         </div>
         <form onSubmit={handleResetPassword} className="mt-8 space-y-6">
           <div>
-            <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('passwordRecovery.newKeyLabel', 'Nueva Contraseña')}
             </label>
             <input
@@ -75,14 +81,14 @@ function ResetPasswordPage() {
               type="password"
               autoComplete="new-password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
           </div>
 
           <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('passwordRecovery.confirmKeyLabel', 'Confirmar Nueva Contraseña')}
             </label>
             <input
@@ -91,7 +97,7 @@ function ResetPasswordPage() {
               type="password"
               autoComplete="new-password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
