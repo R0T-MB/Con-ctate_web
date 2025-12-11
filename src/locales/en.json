@@ -139,14 +139,18 @@
   "success": "Check your email! We've sent you a link to reset your password.",
   "backToLogin": "Back to login"
 },
-  "recoverPassword": {
-  "title": "Reset Password",
-  "label": "Enter your new password",
-  "button": "Reset Password",
-  "mismatch": "Passwords do not match.",
-  "success": "Your password has been successfully reset! You can now log in.",
-  "backToLogin": "Back to login"
-},
+    "passwordRecovery": {
+    "title": "Set New Password",
+    "description": "Please, enter your new password.",
+    "newKeyLabel": "New Password",
+    "confirmKeyLabel": "Confirm New Password",
+    "noMatch": "Passwords do not match.",
+    "tooShort": "Password must be at least 6 characters long.",
+    "updating": "Updating your password...",
+    "successMessage": "Password reset successfully!",
+    "errorPrefix": "Error",
+    "saveButton": "Save new password"
+  },
 "general": {
   "loading": "Sending..."
 },

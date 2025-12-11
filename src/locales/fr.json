@@ -137,15 +137,18 @@
   "success": "Vérifiez votre e-mail ! Nous avons envoyé un lien pour réinitialiser votre mot de passe.",
   "backToLogin": "Retour à la connexion"
 },
-  "recoverPassword": {
-  "title": "Réinitialiser le mot de passe",
-  "label": "Entrez votre nouveau mot de passe",
-  "confirmLabel": "Confirmez le nouveau mot de passe",
-  "button": "Réinitialiser le mot de passe",
-  "mismatch": "Les mots de passe ne correspondent pas.",
-  "success": "Votre mot de passe a été réinitialisé avec succès ! Vous pouvez maintenant vous connecter.",
-  "backToLogin": "Retour à la connexion"
-},
+    "passwordRecovery": {
+    "title": "Définir un nouveau mot de passe",
+    "description": "Veuillez saisir votre nouveau mot de passe.",
+    "newKeyLabel": "Nouveau mot de passe",
+    "confirmKeyLabel": "Confirmer le nouveau mot de passe",
+    "noMatch": "Les mots de passe ne correspondent pas.",
+    "tooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+    "updating": "Mise à jour de votre mot de passe...",
+    "successMessage": "Mot de passe réinitialisé avec succès !",
+    "errorPrefix": "Erreur",
+    "saveButton": "Enregistrer le nouveau mot de passe"
+  },
 "general": {
   "loading": "Envoi..."
 },

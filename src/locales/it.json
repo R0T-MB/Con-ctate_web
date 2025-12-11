@@ -137,15 +137,18 @@
   "success": "Controlla la tua email! Ti abbiamo inviato un link per reimpostare la password.",
   "backToLogin": "Torna al login"
 },
-  "recoverPassword": {
-  "title": "Reimposta Password",
-  "label": "Nuova Password",
-  "confirmLabel": "Conferma Nuova Password",
-  "button": "Reimposta Password",
-  "mismatch": "Le password non corrispondono.",
-  "success": "La tua password è stata reimpostata con successo! Ora puoi accedere.",
-  "backToLogin": "Torna al login"
-},
+    "passwordRecovery": {
+    "title": "Imposta nuova password",
+    "description": "Per favore, inserisci la tua nuova password.",
+    "newKeyLabel": "Nuova password",
+    "confirmKeyLabel": "Conferma nuova password",
+    "noMatch": "Le password non corrispondono.",
+    "tooShort": "La password deve contenere almeno 6 caratteri.",
+    "updating": "Aggiornamento della tua password...",
+    "successMessage": "Password reimpostata con successo!",
+    "errorPrefix": "Errore",
+    "saveButton": "Salva nuova password"
+  },
 "general": {
   "loading": "Invio..."
 },

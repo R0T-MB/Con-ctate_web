@@ -138,15 +138,18 @@
   "success": "Confira seu e-mail! Enviamos um link para você redefinir sua senha.",
   "backToLogin": "Voltar ao login"
 },
- "recoverypassword": {
-  "title": "Definir Nova Senha",
-  "label": "Nova Senha",
-  "confirmLabel": "Confirmar Nova Senha",
-  "button": "Redefinir Senha",
-  "mismatch": "As senhas não coincidem.",
-  "success": "Sua senha foi redefinida com sucesso! Você já pode fazer login.",
-  "backToLogin": "Voltar ao login"
-},
+   "passwordRecovery": {
+    "title": "Definir Nova Senha",
+    "description": "Por favor, digite sua nova senha.",
+    "newKeyLabel": "Nova Senha",
+    "confirmKeyLabel": "Confirmar Nova Senha",
+    "noMatch": "As senhas não coincidem.",
+    "tooShort": "A senha deve ter pelo menos 6 caracteres.",
+    "updating": "Atualizando sua senha...",
+    "successMessage": "Senha redefinida com sucesso!",
+    "errorPrefix": "Erro",
+    "saveButton": "Salvar nova senha"
+  },
 
 "general": {
   "loading": "Enviando..."

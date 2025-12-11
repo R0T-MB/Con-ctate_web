@@ -138,15 +138,18 @@
   "success": "请检查邮箱！我们已发送重置密码的链接。",
   "backToLogin": "返回登录"
 },
-  "recoverPassword": {
-  "title": "设置新密码",
-  "label": "新密码",
-  "confirmLabel": "确认新密码",
-  "button": "重置密码",
-  "mismatch": "密码不匹配。",
-  "success": "你的密码已成功重置！你现在可以登录了。",
-  "backToLogin": "返回登录"
-},
+  "passwordRecovery": {
+    "title": "设置新密码",
+    "description": "请输入您的新密码。",
+    "newKeyLabel": "新密码",
+    "confirmKeyLabel": "确认新密码",
+    "noMatch": "密码不匹配。",
+    "tooShort": "密码长度至少为6个字符。",
+    "updating": "正在更新您的密码...",
+    "successMessage": "密码重置成功！",
+    "errorPrefix": "错误",
+    "saveButton": "保存新密码"
+  },
 "general": {
   "loading": "正在发送..."
 },

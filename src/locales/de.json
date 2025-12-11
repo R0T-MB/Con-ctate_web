@@ -137,15 +137,18 @@
   "success": "Überprüfe deine E-Mails! Wir haben dir einen Link zum Zurücksetzen deines Passworts geschickt.",
   "backToLogin": "Zurück zur Anmeldung"
 },
-  "recoveryPassword": {
-  "title": "Neues Passwort festlegen",
-  "label": "Neues Passwort",
-  "confirmLabel": "Neues Passwort bestätigen",
-  "button": "Passwort zurücksetzen",
-  "mismatch": "Die Passwörter stimmen nicht überein.",
-  "success": "Dein Passwort wurde erfolgreich zurückgesetzt! Du kannst dich jetzt anmelden.",
-  "backToLogin": "Zurück zur Anmeldung"
-},
+    "passwordRecovery": {
+    "title": "Neues Passwort festlegen",
+    "description": "Bitte geben Sie Ihr neues Passwort ein.",
+    "newKeyLabel": "Neues Passwort",
+    "confirmKeyLabel": "Neues Passwort bestätigen",
+    "noMatch": "Passwörter stimmen nicht überein.",
+    "tooShort": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+    "updating": "Ihr Passwort wird aktualisiert...",
+    "successMessage": "Passwort erfolgreich zurückgesetzt!",
+    "errorPrefix": "Fehler",
+    "saveButton": "Neues Passwort speichern"
+  },
 "general": {
   "loading": "Wird gesendet..."
 },
