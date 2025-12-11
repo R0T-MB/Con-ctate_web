@@ -12,6 +12,9 @@ import HowItWorksSection from './HowItWorksSection';
 import PurposeSection from './PurposeSection';
 import FinalCTASection from './FinalCTASection';
 
+// <-- PASO 1: IMPORTA LA IMAGEN
+import mobileHeroImage from '/images/hero-mobile.jpg'; 
+
 const LandingPage = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -23,6 +26,17 @@ const LandingPage = () => {
       navigate('/app');
     }
   }, [user, navigate]);
+
+  // <-- PASO 2: AÑADE UN EFECTO PARA ESTABLECER LA VARIABLE CSS
+  useEffect(() => {
+    // Creamos una variable CSS y le asignamos la URL de la imagen
+    document.documentElement.style.setProperty('--mobile-hero-image', `url(${mobileHeroImage})`);
+    
+    // Función de limpieza para eliminar la variable cuando el componente se desmonta
+    return () => {
+      document.documentElement.style.removeProperty('--mobile-hero-image');
+    };
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -43,10 +57,10 @@ const LandingPage = () => {
 
   return (
     <>
-      {/* <-- CAMBIO AQUÍ: Se eliminó el atributo "style" y se añadió la clase "hero-background" */}
       <section
         className={`relative flex items-center justify-center min-h-screen text-white hero-background ${theme === 'dark' ? '' : ''}`}
       >
+        {/* ... el resto de tu componente sigue igual ... */}
         {/* Contenedor superior de botones optimizado para tacto */}
         <div className="absolute top-4 right-4 z-50 flex items-center space-x-2 p-1">
           <LanguageSelector className="bg-white/20 hover:bg-white/30 border border-white/20" />
