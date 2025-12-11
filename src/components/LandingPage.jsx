@@ -11,6 +11,7 @@ import LanguageSelector from './LanguageSelector';
 import HowItWorksSection from './HowItWorksSection';
 import PurposeSection from './PurposeSection';
 import FinalCTASection from './FinalCTASection';
+import mobileHeroImage from '../assets/images/hero-mobile.jpg';
 
 // <-- PASO 1: IMPORTA LA IMAGEN
 import mobileHeroImage from '/images/hero-mobile.jpg'; 
