@@ -11,10 +11,8 @@ import LanguageSelector from './LanguageSelector';
 import HowItWorksSection from './HowItWorksSection';
 import PurposeSection from './PurposeSection';
 import FinalCTASection from './FinalCTASection';
+// <-- LÍNEA DE IMPORTACIÓN CORRECTA Y ÚNICA
 import mobileHeroImage from '../assets/images/hero-mobile.jpg';
-
-// <-- PASO 1: IMPORTA LA IMAGEN
-import mobileHeroImage from '/images/hero-mobile.jpg'; 
 
 const LandingPage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -61,7 +59,6 @@ const LandingPage = () => {
       <section
         className={`relative flex items-center justify-center min-h-screen text-white hero-background ${theme === 'dark' ? '' : ''}`}
       >
-        {/* ... el resto de tu componente sigue igual ... */}
         {/* Contenedor superior de botones optimizado para tacto */}
         <div className="absolute top-4 right-4 z-50 flex items-center space-x-2 p-1">
           <LanguageSelector className="bg-white/20 hover:bg-white/30 border border-white/20" />
