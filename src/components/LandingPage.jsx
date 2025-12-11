@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../context/ThemeContext'; // <-- IMPORTACIÓN CORRECTA
+import { useTheme } from '../context/ThemeContext';
 import Button from './ui/button';
 import LanguageSelector from './LanguageSelector';
 import HowItWorksSection from './HowItWorksSection';
@@ -13,10 +13,10 @@ import PurposeSection from './PurposeSection';
 import FinalCTASection from './FinalCTASection';
 
 const LandingPage = () => {
-  const { theme, toggleTheme } = useTheme(); // <-- USO CORRECTO
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { t } = useTranslation(); // <-- USO CORRECTO
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -43,44 +43,36 @@ const LandingPage = () => {
 
   return (
     <>
-      {/* <-- CAMBIO IMPORTANTE: Hero Section Modernizada y Optimizada */}
+      {/* <-- CAMBIO AQUÍ: Se eliminó el atributo "style" y se añadió la clase "hero-background" */}
       <section
-        className={`relative flex items-center justify-center min-h-screen text-white ${theme === 'dark' ? '' : ''}`}
-        style={{
-          backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://images.pexels.com/photos/2253879/pexels-photo-2253879.jpeg?auto=compress&cs=tinysrgb&w=1920)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className={`relative flex items-center justify-center min-h-screen text-white hero-background ${theme === 'dark' ? '' : ''}`}
       >
-        {/* Contenedor superior para botones */}
-        {/* <-- REEMPLAZA ESTE BLOQUE COMPLETO */}
-<div className="absolute top-4 right-4 z-10 flex items-center space-x-4">
-  <LanguageSelector className="bg-white/20 backdrop-blur-sm hover:bg-white/30" />
-  
-  {/* Botón de Iniciar Sesión: Solo se muestra si NO hay un usuario */}
-  {!user && (
-    <Button
-      onClick={() => navigate('/login')}
-      variant="secondary"
-      size="sm"
-      className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30"
-    >
-      {t('landing.hero.login', 'Iniciar Sesión')}
-    </Button>
-  )}
+        {/* Contenedor superior de botones optimizado para tacto */}
+        <div className="absolute top-4 right-4 z-50 flex items-center space-x-2 p-1">
+          <LanguageSelector className="bg-white/20 hover:bg-white/30 border border-white/20" />
+          
+          {!user && (
+            <Button
+              onClick={() => navigate('/login')}
+              variant="secondary"
+              size="sm"
+              className="bg-white/20 hover:bg-white/30 text-white border border-white/20 min-h-[44px]"
+            >
+              {t('landing.hero.login', 'Iniciar Sesión')}
+            </Button>
+          )}
 
-  {/* Botón de Cerrar Sesión: Solo se muestra si HAY un usuario */}
-  {user && (
-    <Button
-      onClick={logout}
-      variant="secondary"
-      size="sm"
-      className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30"
-    >
-      {t('header.logout', 'Cerrar Sesión')}
-    </Button>
-  )}
-</div>
+          {user && (
+            <Button
+              onClick={logout}
+              variant="secondary"
+              size="sm"
+              className="bg-white/20 hover:bg-white/30 text-white border border-white/20 min-h-[44px]"
+            >
+              {t('header.logout', 'Cerrar Sesión')}
+            </Button>
+          )}
+        </div>
 
         {/* Contenedor principal del contenido */}
         <motion.div
@@ -105,7 +97,6 @@ const LandingPage = () => {
             {t('landing.hero.subtitle')}
           </motion.p>
 
-          {/* <-- CAMBIO IMPORTANTE: Nuevo mensaje inclusivo */}
           <motion.p
             className="text-base md:text-lg mb-8 opacity-80 max-w-2xl mx-auto drop-shadow-md"
             variants={itemVariants}

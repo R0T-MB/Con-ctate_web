@@ -69,3 +69,24 @@ html, body {
     background: linear-gradient(to left, rgba(17,24,39,1), rgba(17,24,39,0));
   }
 }
+
+/* --- Fondo Responsivo del Hero Section --- */
+
+.hero-background {
+  /* Estilos base (para móviles por defecto) */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url('/images/hero-mobile.jpg'); /* <-- IMAGEN PARA MÓVILES */
+  background-size: cover;
+  background-position: top center; /* Enfocado en la parte superior para móviles */
+  background-repeat: no-repeat;
+  /* background-attachment: fixed; Opcional: para un efecto parallax. Cuidado, puede afectar rendimiento en móviles. */
+}
+
+/* Media Query para pantallas más grandes (Tablets y Escritorios) */
+@media (min-width: 768px) {
+  .hero-background {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url('https://images.pexels.com/photos/2253879/pexels-photo-2253879.jpeg?auto=compress&cs=tinysrgb&w=1920'); /* <-- IMAGEN PARA ESCRITORIO */
+    background-position: center center; /* Centrado para escritorio */
+  }
+}
