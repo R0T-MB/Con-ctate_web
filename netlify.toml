@@ -9,7 +9,24 @@
 [functions]
   directory = "netlify/functions"
 
-# Las redirecciones que ya tenías
+# --- AÑADE ESTAS NUEVAS REGLAS AQUÍ ---
+[[redirects]]
+  from = "/terminos.html"
+  to = "/terminos.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacidad.html"
+  to = "/privacidad.html"
+  status = 200
+
+[[redirects]]
+  from = "/reembolso.html"
+  to = "/reembolso.html"
+  status = 200
+# ----------------------------------------
+
+# La regla "catch-all" que ya tenías, pero ahora al final
 [[redirects]]
   from = "/*"
   to = "/index.html"
