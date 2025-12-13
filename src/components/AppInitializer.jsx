@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext'; // <-- ¡Ya lo tenías!
+import { supabase } from '../lib/supabaseClient'; // <-- ¡Ya lo tenías!
 import toast, { Toaster } from 'react-hot-toast';
-import { I18nextProvider } from 'react-i18next'; // <-- 1. IMPORTA EL PROVEEDOR
-import i18n from '../i18n'; // <-- 2. IMPORTA TU INSTANCIA DE I18N
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../i18n';
 
 // Importa TODOS tus componentes de página
 import LoginPage from './auth/LoginPage';
@@ -39,10 +39,31 @@ const ConfirmationScreen = () => (
   </div>
 );
 
-// Este componente contiene la lógica principal (sin cambios)
+// --- NUEVO: Función de suscripción que podemos reutilizar ---
+const handleSubscribe = async (priceId) => {
+    try {
+        const { data, error } = await supabase.functions.invoke('paddle-checkout', {
+            body: { priceId },
+        });
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        window.location.href = data.url;
+
+    } catch (error) {
+        console.error('Error al suscribirse:', error);
+        toast.error(error.message);
+    }
+};
+
+
+// Este componente contiene la lógica principal
 function AppContent() {
     const navigate = useNavigate();
     const [isConfirming, setIsConfirming] = useState(false);
+    const { user } = useAuth(); // --- NUEVO: Obtenemos el usuario para mostrar el botón condicionalmente
 
     useEffect(() => {
         const { hash } = window.location;
@@ -105,30 +126,44 @@ function AppContent() {
     }
 
     return (
-        <Routes>
-            {/* Rutas Públicas */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/test-route" element={<TestRoute />} />
-            <Route path="/test-destination" element={<TestDestination />} />
-            <Route path="/registration-success" element={<RegistrationSuccessPage />} />
-            
-            {/* Ruta Protegida para el resto de la aplicación */}
-            <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
-            
-            {/* Redirección por defecto para cualquier otra ruta */}
-            <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <div className="relative">
+            <Routes>
+                {/* Rutas Públicas */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/test-route" element={<TestRoute />} />
+                <Route path="/test-destination" element={<TestDestination />} />
+                <Route path="/registration-success" element={<RegistrationSuccessPage />} />
+                
+                {/* Ruta Protegida para el resto de la aplicación */}
+                <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
+                
+                {/* Redirección por defecto para cualquier otra ruta */}
+                <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+
+            {/* --- NUEVO: BOTÓN FLOTANTE DE SUSCRIPCIÓN --- */}
+            {user && (
+                <div className="fixed bottom-5 right-5 z-50">
+                    <button
+                        onClick={() => handleSubscribe('pri_01kc9ak434g0mqbry653pegctd')} // <-- ¡REEMPLAZA ESTO!
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+                    >
+                        Suscribirse a Premium
+                    </button>
+                </div>
+            )}
+        </div>
     );
 }
 
 // El componente principal que exportamos, ahora envuelve TODO en el proveedor
 function AppInitializer() {
     return (
-        <I18nextProvider i18n={i18n}> {/* <-- 3. ENVUELVE EL ROUTER Y EL TOASTER */}
+        <I18nextProvider i18n={i18n}>
             <Router>
                 <AppContent />
             </Router>
