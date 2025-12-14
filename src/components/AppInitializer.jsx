@@ -115,7 +115,7 @@ function AppContent() {
         try {
             // 1. Llama a nuestra Edge Function para crear la transacción
             const { data, error } = await supabase.functions.invoke('paddle-checkout', {
-                body: { priceId: 'pri_01kc9ak434g0mqbry653pegctd' }, // <-- ¡REEMPLAZA ESTO!
+                body: { priceId: 'pri_01kcevnwdtcgvt7k15j6pxv9x3' }, // <-- ¡REEMPLAZA ESTO!
             });
 
             if (error) {
