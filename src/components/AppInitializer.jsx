@@ -40,8 +40,15 @@ const ConfirmationScreen = () => (
 );
 
 // --- NUEVO: Función de suscripción que podemos reutilizar ---
+// --- NUEVA FUNCIÓN DE SUSCRIPCIÓN ---
 const handleSubscribe = async (priceId) => {
+    if (!session) {
+        toast.error('Debes iniciar sesión para suscribirte.');
+        return;
+    }
+
     try {
+        // 1. Llama a nuestra Edge Function para crear la transacción
         const { data, error } = await supabase.functions.invoke('paddle-checkout', {
             body: { priceId },
         });
@@ -50,7 +57,16 @@ const handleSubscribe = async (priceId) => {
             throw new Error(error.message);
         }
 
-        window.location.href = data.url;
+        // 2. Inicializa Paddle con tu clave de Sandbox
+        Paddle.Environment.set('sandbox');
+        Paddle.Initialize({
+            token: 'test_4020d3445bbad83c1c27ec1cb9e', // <-- ¡REEMPLAZA ESTO!
+        });
+
+        // 3. Abre el checkout inline con el ID de la transacción
+        Paddle.Checkout.open({
+            transactionId: data.transactionId, // Usamos el ID que nos devolvió la función
+        });
 
     } catch (error) {
         console.error('Error al suscribirse:', error);
