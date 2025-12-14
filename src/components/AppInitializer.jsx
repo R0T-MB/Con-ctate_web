@@ -39,47 +39,11 @@ const ConfirmationScreen = () => (
   </div>
 );
 
-// --- NUEVO: Función de suscripción que podemos reutilizar ---
-// --- NUEVA FUNCIÓN DE SUSCRIPCIÓN ---
-const handleSubscribe = async (priceId) => {
-    if (!session) {
-        toast.error('Debes iniciar sesión para suscribirte.');
-        return;
-    }
-
-    try {
-        // 1. Llama a nuestra Edge Function para crear la transacción
-        const { data, error } = await supabase.functions.invoke('paddle-checkout', {
-            body: { priceId },
-        });
-
-        if (error) {
-            throw new Error(error.message);
-        }
-
-        // 2. Inicializa Paddle con tu clave de Sandbox
-        Paddle.Environment.set('sandbox');
-        Paddle.Initialize({
-            token: 'test_4020d3445bbad83c1c27ec1cb9e', // <-- ¡REEMPLAZA ESTO!
-        });
-
-        // 3. Abre el checkout inline con el ID de la transacción
-        Paddle.Checkout.open({
-            transactionId: data.transactionId, // Usamos el ID que nos devolvió la función
-        });
-
-    } catch (error) {
-        console.error('Error al suscribirse:', error);
-        toast.error(error.message);
-    }
-};
-
-
 // Este componente contiene la lógica principal
 function AppContent() {
     const navigate = useNavigate();
     const [isConfirming, setIsConfirming] = useState(false);
-    const { user } = useAuth(); // --- NUEVO: Obtenemos el usuario para mostrar el botón condicionalmente
+    const { user } = useAuth(); // <-- Obtenemos 'user' aquí
 
     useEffect(() => {
         const { hash } = window.location;
@@ -141,6 +105,40 @@ function AppContent() {
         return <ConfirmationScreen />;
     }
 
+    // --- FUNCIÓN DE SUSCRIPCIÓN CORREGIDA Y DENTRO DEL COMPONENTE ---
+    const handleSubscribe = async () => {
+        if (!user) { // <-- Usamos la variable 'user' que sí existe aquí
+            toast.error('Debes iniciar sesión para suscribirte.');
+            return;
+        }
+
+        try {
+            // 1. Llama a nuestra Edge Function para crear la transacción
+            const { data, error } = await supabase.functions.invoke('paddle-checkout', {
+                body: { priceId: 'pri_01kc9ak434g0mqbry653pegctd' }, // <-- ¡REEMPLAZA ESTO!
+            });
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            // 2. Inicializa Paddle con tu clave de Sandbox
+            Paddle.Environment.set('sandbox');
+            Paddle.Initialize({
+                token: 'test_4020d3445bbad83c1c27ec1cb9e', // <-- ¡REEMPLAZA ESTO CON TU TOKEN!
+            });
+
+            // 3. Abre el checkout inline con el ID de la transacción
+            Paddle.Checkout.open({
+                transactionId: data.transactionId, // Usamos el ID que nos devolvió la función
+            });
+
+        } catch (error) {
+            console.error('Error al suscribirse:', error);
+            toast.error(error.message);
+        }
+    };
+
     return (
         <div className="relative">
             <Routes>
@@ -161,11 +159,11 @@ function AppContent() {
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
 
-            {/* --- NUEVO: BOTÓN FLOTANTE DE SUSCRIPCIÓN --- */}
+            {/* --- BOTÓN FLOTANTE DE SUSCRIPCIÓN --- */}
             {user && (
                 <div className="fixed bottom-5 right-5 z-50">
                     <button
-                        onClick={() => handleSubscribe('pri_01kc9ak434g0mqbry653pegctd')} // <-- ¡REEMPLAZA ESTO!
+                        onClick={handleSubscribe} // <-- Llama a la función corregida
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
                     >
                         Suscribirse a Premium
