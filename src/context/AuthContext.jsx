@@ -60,22 +60,18 @@ export const AuthProvider = ({ children }) => {
 
     // Escucha los cambios de auth (login, logout, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('🔐 onAuthStateChange disparado:', _event, session?.user?.id);
-
-      if (_event === 'SIGNED_IN' && session) {
-    console.log('✅ Condición de SIGNED_IN cumplida. Voy a llamar a createPaddleCustomerForUser.');
-    await createPaddleCustomerForUser(session);
-  }
+  console.log('🔐 onAuthStateChange disparado:', _event, session?.user?.id);
   
-      setUser(session?.user ?? null);
-      setLoading(false);
+  setUser(session?.user ?? null);
+  setLoading(false); // <-- IMPORTANTE: Quitamos el loading aquí mismo
 
-      // --- NUEVA LÓGICA: Si el usuario inicia sesión, crea su cliente de Paddle ---
-      if (_event === 'SIGNED_IN' && session) {
-        // Llamamos a nuestra nueva función
-        await createPaddleCustomerForUser(session);
-      }
-    });
+  // Llamamos a la función SIN 'await' para que no bloquee el login
+  if (_event === 'SIGNED_IN' && session) {
+    console.log('✅ Condición de SIGNED_IN cumplida. Voy a llamar a createPaddleCustomerForUser en segundo plano.');
+    // No usamos await. La función se ejecutará en segundo plano.
+    createPaddleCustomerForUser(session); 
+  }
+});
 
     // Limpia la suscripción cuando el componente se desmonta
     return () => subscription.unsubscribe();
