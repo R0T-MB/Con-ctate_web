@@ -10,6 +10,43 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // --- NUEVA FUNCIÓN PARA CREAR EL CLIENTE EN PADDLE ---
+  const createPaddleCustomerForUser = async (session) => {
+    if (!session?.user) {
+      console.error("No hay sesión de usuario para crear el cliente de Paddle.");
+      return;
+    }
+
+    // Opcional pero recomendado: comprueba si el usuario ya tiene un ID de Paddle
+    // para no crearlo innecesariamente.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('paddle_customer_id')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile?.paddle_customer_id) {
+      console.log('El usuario ya tiene un paddle_customer_id. No se crea uno nuevo.');
+      return;
+    }
+
+    console.log(`Creando cliente de Paddle para el usuario ${session.user.email}...`);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-paddle-customer', {
+        // No necesitas pasar un body, la función obtiene el usuario del token
+      });
+
+      if (error) {
+        console.error("Error al invocar la función create-paddle-customer:", error);
+      } else {
+        console.log("Cliente de Paddle creado/verificado con éxito:", data);
+      }
+    } catch (err) {
+      console.error("Error inesperado al crear el cliente de Paddle:", err);
+    }
+  };
+
   // useEffect que escucha los cambios de estado de autenticación de Supabase
   useEffect(() => {
     // Obtiene la sesión actual al cargar la aplicación
@@ -22,10 +59,22 @@ export const AuthProvider = ({ children }) => {
     getSession();
 
     // Escucha los cambios de auth (login, logout, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('🔐 onAuthStateChange disparado:', _event, session?.user?.id);
+
+      if (_event === 'SIGNED_IN' && session) {
+    console.log('✅ Condición de SIGNED_IN cumplida. Voy a llamar a createPaddleCustomerForUser.');
+    await createPaddleCustomerForUser(session);
+  }
+  
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // --- NUEVA LÓGICA: Si el usuario inicia sesión, crea su cliente de Paddle ---
+      if (_event === 'SIGNED_IN' && session) {
+        // Llamamos a nuestra nueva función
+        await createPaddleCustomerForUser(session);
+      }
     });
 
     // Limpia la suscripción cuando el componente se desmonta
