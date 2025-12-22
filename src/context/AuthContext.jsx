@@ -10,15 +10,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // --- NUEVA FUNCIÓN PARA CREAR EL CLIENTE EN PADDLE ---
+  // --- FUNCIÓN PARA CREAR EL CLIENTE EN PADDLE (sin cambios, está bien) ---
   const createPaddleCustomerForUser = async (session) => {
-    if (!session?.user) {
-      console.error("No hay sesión de usuario para crear el cliente de Paddle.");
+    if (!session?.user?.email) {
+      console.error("No hay sesión de usuario o email para crear el cliente de Paddle.");
       return;
     }
 
-    // Opcional pero recomendado: comprueba si el usuario ya tiene un ID de Paddle
-    // para no crearlo innecesariamente.
+    // Comprueba si el usuario ya tiene un ID de Paddle para no crearlo innecesariamente.
     const { data: profile } = await supabase
       .from('profiles')
       .select('paddle_customer_id')
@@ -33,10 +32,7 @@ export const AuthProvider = ({ children }) => {
     console.log(`Creando cliente de Paddle para el usuario ${session.user.email}...`);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-paddle-customer', {
-        // No necesitas pasar un body, la función obtiene el usuario del token
-      });
-
+      const { data, error } = await supabase.functions.invoke('create-paddle-customer');
       if (error) {
         console.error("Error al invocar la función create-paddle-customer:", error);
       } else {
@@ -47,43 +43,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // useEffect que escucha los cambios de estado de autenticación de Supabase
+  // useEffect que maneja la sesión de forma robusta
   useEffect(() => {
-    // Obtiene la sesión actual al cargar la aplicación
-    const getSession = async () => {
+    let isMounted = true; // Flag para evitar actualizaciones de estado si el componente se desmonta
+
+    // 1. Obtiene la sesión actual al cargar la aplicación
+    const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      
+      if (isMounted) {
+        if (session) {
+          setUser(session.user);
+          // Si el usuario ya está logueado, creamos su cliente de Paddle aquí
+          createPaddleCustomerForUser(session);
+        } else {
+          setUser(null);
+        }
+        setLoading(false); // Importante: el loading termina solo después de tener la sesión inicial
+      }
     };
 
-    getSession();
+    getInitialSession();
 
-    // Escucha los cambios de auth (login, logout, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-  console.log('🔐 onAuthStateChange disparado:', _event, session?.user?.id);
-  
-  setUser(session?.user ?? null);
-  setLoading(false); // <-- IMPORTANTE: Quitamos el loading aquí mismo
-
-  // Llamamos a la función SIN 'await' para que no bloquee el login
-  if (_event === 'SIGNED_IN' && session) {
-    console.log('✅ Condición de SIGNED_IN cumplida. Voy a llamar a createPaddleCustomerForUser en segundo plano.');
-    // No usamos await. La función se ejecutará en segundo plano.
-    createPaddleCustomerForUser(session); 
-  }
-});
+    // 2. Escucha los cambios de auth (login, logout, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('🔐 onAuthStateChange disparado:', _event, session?.user?.id);
+      
+      if (isMounted) {
+        if (_event === 'SIGNED_IN' && session) {
+          setUser(session.user);
+          // No es necesario volver a llamar a createPaddleCustomerForUser aquí si ya se llamó en getInitialSession
+          // pero lo dejamos por si acaso el login ocurre de otra forma.
+          // createPaddleCustomerForUser(session); 
+        } else if (_event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+        // No establecemos setLoading(false) aquí para evitar parpadeos en la UI
+      }
+    });
 
     // Limpia la suscripción cuando el componente se desmonta
-    return () => subscription.unsubscribe();
-  }, []); // El array vacío asegura que solo se ejecute una vez
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []); // El array vacío asegura que solo se ejecute una vez al montar
 
   // Función de inicio de sesión con Supabase
   const login = async (email, password) => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setLoading(false);
@@ -97,10 +106,7 @@ export const AuthProvider = ({ children }) => {
   // Función de registro con Supabase
   const register = async (email, password) => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       setLoading(false);
