@@ -1,56 +1,62 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import toast from 'react-hot-toast'; // <-- AÑADIDO: Importar toast
+import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Este user ahora contendrá los datos de auth + perfil
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Función para obtener el perfil del usuario desde la tabla 'profiles'
+  // --- VERSIÓN DE DEPURACIÓN DE fetchUserProfile ---
   const fetchUserProfile = async (authUser) => {
+    console.log('🕵️‍♂️ fetchUserProfile llamado con:', authUser?.id);
     if (!authUser) {
+      console.log('❌ fetchUserProfile: No hay authUser, setUser(null)');
       setUser(null);
       return;
     }
 
     try {
+      console.log('🔍 Buscando perfil en la base de datos para el ID:', authUser.id);
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('*') // Selecciona todo: subscription_status, plan_id, etc.
-        .eq('id', authUser.id) // Compara con el ID de autenticación
-        .single(); // Espera un único resultado
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      console.log('📊 Resultado de la búsqueda de perfil:', { profile, error });
 
       if (error) {
-        console.error('Error fetching user profile:', error);
-        // Si no hay perfil (ej. usuario nuevo), dejamos el usuario de auth.
+        console.error('❌ Error en la búsqueda de perfil (bloque if):', error);
         setUser({ ...authUser, subscription_status: null, plan_id: null });
       } else {
-        // Combinamos los datos de autenticación con los del perfil
+        console.log('✅ Perfil encontrado, combinando datos.');
         setUser({ ...authUser, ...profile });
       }
     } catch (err) {
-      console.error('Unexpected error fetching profile:', err);
+      console.error('💥 Error inesperado en el bloque catch de fetchUserProfile:', err);
       setUser({ ...authUser, subscription_status: null, plan_id: null });
     }
+    console.log('🏁 fetchUserProfile ha terminado.');
   };
+  // --- FIN DE LA VERSIÓN DE DEPURACIÓN ---
 
   useEffect(() => {
-    // Obtiene la sesión actual al cargar la aplicación
     const getSession = async () => {
+      console.log('🚀 Iniciando getSession...');
       const { data: { session } } = await supabase.auth.getSession();
-      await fetchUserProfile(session?.user ?? null); // Usamos la nueva función
+      await fetchUserProfile(session?.user ?? null);
       setLoading(false);
+      console.log('✅ getSession y fetchUserProfile iniciales completados.');
     };
 
     getSession();
 
-    // Escucha los cambios de auth (login, logout, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('🔐 onAuthStateChange disparado:', _event, session?.user?.id);
-      await fetchUserProfile(session?.user ?? null); // Usamos la nueva función
+      await fetchUserProfile(session?.user ?? null);
       setLoading(false);
 
       if (_event === 'SIGNED_IN' && session) {
@@ -105,7 +111,6 @@ export const AuthProvider = ({ children }) => {
     if (error) console.error('Error al cerrar sesión:', error.message);
   };
 
-  // --- FUNCIÓN DE SUSCRIPCIÓN MOVIDA AQUÍ ---
   const handleSubscribe = async () => {
     if (!user) {
       toast.error('Debes iniciar sesión para suscribirte.');
@@ -122,8 +127,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       Paddle.Environment.set(import.meta.env.VITE_PADDLE_ENVIRONMENT);
-Paddle.Initialize({
-  token: import.meta.env.VITE_PADDLE_TOKEN,
+      Paddle.Initialize({
+        token: import.meta.env.VITE_PADDLE_TOKEN,
       });
 
       Paddle.Checkout.open({
@@ -137,12 +142,12 @@ Paddle.Initialize({
   };
 
   const value = {
-    user, // Ahora user contiene subscription_status
+    user,
     login,
     register,
     logout,
     loading,
-    handleSubscribe, // <-- AÑADIDO: Exponer la función
+    handleSubscribe,
   };
 
   if (loading) {
