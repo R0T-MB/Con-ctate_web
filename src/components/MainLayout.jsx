@@ -19,13 +19,14 @@ import { debounce } from 'lodash';
 import ChatHistoryPage from './ChatHistoryPage';
 import { saveChatEntry } from '../lib/chatHistory';
 import toast from 'react-hot-toast';
+import RequirePremium from './RequirePremium';
 
 // Definimos el límite diario de tokens
 const DAILY_TOKEN_LIMIT = 5000;
 
 function MainLayout() {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, handleSubscribe } = useAuth();
 
   const [activeTab, setActiveTab] = useState("retos");
   const [retos, setRetos] = useState([]);
@@ -621,9 +622,19 @@ function MainLayout() {
           </div>
         );
 
-      case "logros":
+            case "logros":
         return (
-          <LogrosPage logEntries={logEntries} setLogEntries={setLogEntries} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} handleAddLogEntry={handleAddLogEntry} playSuccess={playSuccess} t={t} />
+          <RequirePremium>
+            <LogrosPage
+              logEntries={logEntries}
+              setLogEntries={setLogEntries}
+              isModalOpen={isModalOpen}
+              setIsModalOpen={setIsModalOpen}
+              handleAddLogEntry={handleAddLogEntry}
+              playSuccess={playSuccess}
+              t={t}
+            />
+          </RequirePremium>
         );
 
       default:

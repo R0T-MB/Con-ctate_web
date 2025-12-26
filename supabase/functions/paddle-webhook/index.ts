@@ -6,8 +6,9 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
 serve(async (req) => {
-  console.log('🔥 WEBHOOK PADDLE VERSION FINAL 2025 🔥')
+  console.log('🔥 WEBHOOK PADDLE VERSION IDEMPOTENTE 🔥')
 
+  // ... (toda tu lógica de verificación de firma se mantiene igual) ...
   if (!PADDLE_WEBHOOK_SECRET) {
     console.error('❌ Falta PADDLE_WEBHOOK_SECRET')
     return new Response('Config error', { status: 500 })
@@ -72,33 +73,75 @@ serve(async (req) => {
   const bodyText = new TextDecoder().decode(rawBody)
   const event = JSON.parse(bodyText)
 
-  console.log('📩 Evento recibido:', event.event_type)
+  console.log(`📩 Evento recibido: ${event.event_type} | ID: ${event.id}`)
 
   const supabase = createClient(
     SUPABASE_URL ?? '',
     SUPABASE_SERVICE_ROLE_KEY ?? ''
   )
 
+  // --- INICIO DE LÓGICA DE IDEMPOTENCIA ---
+  // 1. Verificar si el evento ya fue procesado
+  const { data: existingEvent } = await supabase
+    .from('processed_paddle_events')
+    .select('event_id')
+    .eq('event_id', event.id)
+    .maybeSingle()
+
+  if (existingEvent) {
+    console.log(`🔁 Evento ${event.id} ya fue procesado. Ignorando.`)
+    return new Response('OK', { status: 200 })
+  }
+  // --- FIN DE LÓGICA DE IDEMPOTENCIA ---
+
+
   if (
     event.event_type === 'transaction.completed' &&
     event.data?.subscription_id
   ) {
-    const { customer_id, subscription_id, items } = event.data
-    const planId = items?.[0]?.price?.id ?? null
+    try {
+      const { customer_id, subscription_id, items } = event.data
+      const planId = items?.[0]?.price?.id ?? null
 
-    console.log(`🔄 Activando suscripción ${subscription_id}`)
+      console.log(`🔄 Procesando activación para suscripción ${subscription_id}...`)
 
-    await supabase.from('profiles').upsert(
-      {
-        paddle_customer_id: customer_id,
-        subscription_status: 'active',
-        plan_id: planId,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'paddle_customer_id' }
-    )
+      const { error: upsertError } = await supabase.from('profiles').upsert(
+        {
+          paddle_customer_id: customer_id,
+          subscription_status: 'active',
+          plan_id: planId,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'paddle_customer_id' }
+      )
 
-    console.log('✅ Suscripción activada')
+      if (upsertError) {
+        throw upsertError // Lanza el error para que lo capture el catch
+      }
+
+      console.log('✅ Suscripción activada en la base de datos.')
+
+      // --- INICIO DE REGISTRO DE EVENTO ---
+      // 2. Si el procesamiento fue exitoso, guardar el ID del evento
+      const { error: insertError } = await supabase
+        .from('processed_paddle_events')
+        .insert({ event_id: event.id })
+
+      if (insertError) {
+        // Es un error crítico para la idempotencia, pero la suscripción ya se activó.
+        // Lo registramos pero no fallamos la petición.
+        console.error('⚠️ Error al guardar el evento procesado:', insertError)
+      } else {
+        console.log(`✅ Evento ${event.id} guardado como procesado.`)
+      }
+      // --- FIN DE REGISTRO DE EVENTO ---
+
+    } catch (error) {
+      console.error('❌ Error al procesar el evento de pago:', error)
+      // Devolvemos un 500 para que Paddle pueda reintentar más tarde.
+      // Como no guardamos el event_id, el reintentó se procesará correctamente.
+      return new Response('Error processing event', { status: 500 })
+    }
   }
 
   return new Response('OK', { status: 200 })

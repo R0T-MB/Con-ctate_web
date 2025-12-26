@@ -1,5 +1,4 @@
 // src/components/AppInitializer.jsx
-
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // <-- ¡Ya lo tenías!
@@ -43,7 +42,7 @@ const ConfirmationScreen = () => (
 function AppContent() {
     const navigate = useNavigate();
     const [isConfirming, setIsConfirming] = useState(false);
-    const { user } = useAuth(); // <-- Obtenemos 'user' aquí
+    const { user, handleSubscribe } = useAuth(); // <-- MODIFICADO: Obtener handleSubscribe del contexto
 
     useEffect(() => {
         const { hash } = window.location;
@@ -105,39 +104,7 @@ function AppContent() {
         return <ConfirmationScreen />;
     }
 
-    // --- FUNCIÓN DE SUSCRIPCIÓN CORREGIDA Y DENTRO DEL COMPONENTE ---
-    const handleSubscribe = async () => {
-        if (!user) { // <-- Usamos la variable 'user' que sí existe aquí
-            toast.error('Debes iniciar sesión para suscribirte.');
-            return;
-        }
-
-        try {
-            // 1. Llama a nuestra Edge Function para crear la transacción
-            const { data, error } = await supabase.functions.invoke('paddle-checkout', {
-                body: { priceId: 'pri_01kcevnwdtcgvt7k15j6pxv9x3' }, // <-- ¡REEMPLAZA ESTO!
-            });
-
-            if (error) {
-                throw new Error(error.message);
-            }
-
-            // 2. Inicializa Paddle con tu clave de Sandbox
-            Paddle.Environment.set('sandbox');
-            Paddle.Initialize({
-                token: 'test_4020d3445bbad83c1c27ec1cb9e', // <-- ¡REEMPLAZA ESTO CON TU TOKEN!
-            });
-
-            // 3. Abre el checkout inline con el ID de la transacción
-            Paddle.Checkout.open({
-                transactionId: data.transactionId, // Usamos el ID que nos devolvió la función
-            });
-
-        } catch (error) {
-            console.error('Error al suscribirse:', error);
-            toast.error(error.message);
-        }
-    };
+    // --- FUNCIÓN handleSubscribe ELIMINADA DE AQUÍ ---
 
     return (
         <div className="relative">
@@ -163,7 +130,7 @@ function AppContent() {
             {user && (
                 <div className="fixed bottom-5 right-5 z-50">
                     <button
-                        onClick={handleSubscribe} // <-- Llama a la función corregida
+                        onClick={handleSubscribe} // <-- MODIFICADO: Usa la función del contexto
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
                     >
                         Suscribirse a Premium
