@@ -6,9 +6,8 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
 serve(async (req) => {
-  console.log('🔥 WEBHOOK PADDLE VERSION IDEMPOTENTE 🔥')
+  console.log('🔥 WEBHOOK PADDLE VERSION FINAL CON MANEJO DE EVENTOS 🔥')
 
-  // ... (toda tu lógica de verificación de firma se mantiene igual) ...
   if (!PADDLE_WEBHOOK_SECRET) {
     console.error('❌ Falta PADDLE_WEBHOOK_SECRET')
     return new Response('Config error', { status: 500 })
@@ -81,7 +80,6 @@ serve(async (req) => {
   )
 
   // --- INICIO DE LÓGICA DE IDEMPOTENCIA ---
-  // 1. Verificar si el evento ya fue procesado
   const { data: existingEvent } = await supabase
     .from('processed_paddle_events')
     .select('event_id')
@@ -94,12 +92,21 @@ serve(async (req) => {
   }
   // --- FIN DE LÓGICA DE IDEMPOTENCIA ---
 
+  // Función helper para registrar el evento procesado
+  const markEventAsProcessed = async (eventId: string) => {
+    const { error: insertError } = await supabase
+      .from('processed_paddle_events')
+      .insert({ event_id: eventId });
 
-  if (
-    event.event_type === 'transaction.completed' &&
-    event.data?.subscription_id
-  ) {
-    try {
+    if (insertError) {
+      console.error('⚠️ Error al guardar el evento procesado:', insertError);
+    } else {
+      console.log(`✅ Evento ${eventId} guardado como procesado.`);
+    }
+  };
+
+  try {
+    if (event.event_type === 'transaction.completed' && event.data?.subscription_id) {
       const { customer_id, subscription_id, items } = event.data
       const planId = items?.[0]?.price?.id ?? null
 
@@ -116,32 +123,57 @@ serve(async (req) => {
       )
 
       if (upsertError) {
-        throw upsertError // Lanza el error para que lo capture el catch
+        throw upsertError
       }
 
       console.log('✅ Suscripción activada en la base de datos.')
+      await markEventAsProcessed(event.id);
 
-      // --- INICIO DE REGISTRO DE EVENTO ---
-      // 2. Si el procesamiento fue exitoso, guardar el ID del evento
-      const { error: insertError } = await supabase
-        .from('processed_paddle_events')
-        .insert({ event_id: event.id })
+    } else if (event.event_type === 'subscription.cancelled') {
+      const { customer_id } = event.data;
+      console.log(`🔄 Procesando cancelación para el cliente ${customer_id}...`);
 
-      if (insertError) {
-        // Es un error crítico para la idempotencia, pero la suscripción ya se activó.
-        // Lo registramos pero no fallamos la petición.
-        console.error('⚠️ Error al guardar el evento procesado:', insertError)
-      } else {
-        console.log(`✅ Evento ${event.id} guardado como procesado.`)
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          subscription_status: 'cancelled',
+          plan_id: null, // Limpiar el plan al cancelar
+          updated_at: new Date().toISOString(),
+        })
+        .eq('paddle_customer_id', customer_id);
+
+      if (updateError) {
+        throw updateError;
       }
-      // --- FIN DE REGISTRO DE EVENTO ---
 
-    } catch (error) {
-      console.error('❌ Error al procesar el evento de pago:', error)
-      // Devolvemos un 500 para que Paddle pueda reintentar más tarde.
-      // Como no guardamos el event_id, el reintentó se procesará correctamente.
-      return new Response('Error processing event', { status: 500 })
+      console.log('✅ Suscripción cancelada en la base de datos.');
+      await markEventAsProcessed(event.id);
+
+    } else if (event.event_type === 'payment.failed') {
+      const { customer_id, subscription_id } = event.data;
+      console.log(`🔄 Procesando pago fallido para la suscripción ${subscription_id}...`);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          subscription_status: 'past_due', // Estado de "pago vencido"
+          updated_at: new Date().toISOString(),
+        })
+        .eq('paddle_customer_id', customer_id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      console.log('✅ Estado de suscripción actualizado a "past_due" en la base de datos.');
+      await markEventAsProcessed(event.id);
     }
+
+  } catch (error) {
+    console.error(`❌ Error al procesar el evento ${event.event_type}:`, error)
+    // Devolvemos un 500 para que Paddle pueda reintentar más tarde.
+    // Como no guardamos el event_id, el reintento se procesará correctamente.
+    return new Response('Error processing event', { status: 500 })
   }
 
   return new Response('OK', { status: 200 })
