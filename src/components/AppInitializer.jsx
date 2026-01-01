@@ -1,8 +1,8 @@
 // src/components/AppInitializer.jsx
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // <-- ¡Ya lo tenías!
-import { supabase } from '../lib/supabaseClient'; // <-- ¡Ya lo tenías!
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 import toast, { Toaster } from 'react-hot-toast';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
@@ -15,8 +15,20 @@ import LandingPage from './LandingPage';
 import MainLayout from './MainLayout';
 import TestRoute from '../TestRoute';
 import TestDestination from '../TestDestination';
-import RegistrationSuccessPage from './auth/RegistrationSuccessPage';
+// import RegistrationSuccessPage from './auth/RegistrationSuccessPage'; <-- COMENTADO PARA LA PRUEBA
 import ResetPasswordPage from './auth/ResetPasswordPage';
+
+// --- COMPONENTE DE PRUEBA ---
+const TestSuccessPage = () => {
+  return (
+    <div style={{ padding: '50px', textAlign: 'center', backgroundColor: 'lightblue' }}>
+      <h1>¡PÁGINA DE ÉXITO DE PRUEBA!</h1>
+      <p>Si ves esto, el enrutamiento funciona y el problema es la importación del componente original.</p>
+    </div>
+  );
+};
+// --- FIN DEL COMPONENTE DE PRUEBA ---
+
 
 // Componente para proteger rutas (sin cambios)
 const ProtectedRoute = ({ children }) => {
@@ -42,7 +54,7 @@ const ConfirmationScreen = () => (
 function AppContent() {
     const navigate = useNavigate();
     const [isConfirming, setIsConfirming] = useState(false);
-    const { user, handleSubscribe } = useAuth(); // <-- MODIFICADO: Obtener handleSubscribe del contexto
+    const { user, handleSubscribe } = useAuth();
 
     useEffect(() => {
         const { hash } = window.location;
@@ -104,8 +116,6 @@ function AppContent() {
         return <ConfirmationScreen />;
     }
 
-    // --- FUNCIÓN handleSubscribe ELIMINADA DE AQUÍ ---
-
     return (
         <div className="relative">
             <Routes>
@@ -117,7 +127,7 @@ function AppContent() {
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/test-route" element={<TestRoute />} />
                 <Route path="/test-destination" element={<TestDestination />} />
-                <Route path="/registration-success" element={<RegistrationSuccessPage />} />
+                <Route path="/registration-success" element={<TestSuccessPage />} /> {/* <-- CAMBIADO AQUÍ */}
                 
                 {/* Ruta Protegida para el resto de la aplicación */}
                 <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
@@ -130,7 +140,7 @@ function AppContent() {
             {user && (
                 <div className="fixed bottom-5 right-5 z-50">
                     <button
-                        onClick={handleSubscribe} // <-- MODIFICADO: Usa la función del contexto
+                        onClick={handleSubscribe}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
                     >
                         Suscribirse a Premium
