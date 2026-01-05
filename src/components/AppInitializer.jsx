@@ -1,4 +1,4 @@
-// src/components/AppInitializer.jsx (VERSIÓN LIMPIA Y FINAL)
+// src/components/AppInitializer.jsx (VERSIÓN CON TEST DE LOGIN)
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,15 +8,27 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
 
 // Importa TODOS tus componentes de página
-import LoginPage from './auth/LoginPage';
+// import LoginPage from './auth/LoginPage'; <-- COMENTADO PARA LA PRUEBA
 import RegisterPage from './auth/RegisterPage';
 import ForgotPasswordPage from './auth/ForgotPasswordPage';
 import LandingPage from './LandingPage';
 import MainLayout from './MainLayout';
 import TestRoute from '../TestRoute';
 import TestDestination from '../TestDestination';
-// RegistrationSuccessPage ya no se necesita
 import ResetPasswordPage from './auth/ResetPasswordPage';
+
+// --- COMPONENTE DE PRUEBA DE LOGIN ---
+const TestLoginPage = () => {
+  return (
+    <div style={{ padding: '50px', textAlign: 'center', backgroundColor: 'lightcoral' }}>
+      <h1>¡PÁGINA DE LOGIN DE PRUEBA!</h1>
+      <p>Si ves esto, el enrutamiento funciona y el problema es la importación del componente original o uno de sus hijos.</p>
+      <a href="/register" style={{ color: 'blue', textDecoration: 'underline' }}>Ir a Registro</a>
+    </div>
+  );
+};
+// --- FIN DEL COMPONENTE DE PRUEBA ---
+
 
 // Componente para proteger rutas
 const ProtectedRoute = ({ children }) => {
@@ -106,13 +118,12 @@ function AppContent() {
             <Routes>
                 {/* Rutas Públicas */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="/login" element={<TestLoginPage />} /> {/* <-- CAMBIADO AQUÍ */}
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/test-route" element={<TestRoute />} />
                 <Route path="/test-destination" element={<TestDestination />} />
-                {/* La ruta /registration-success ha sido eliminada */}
                 
                 {/* Ruta Protegida para el resto de la aplicación */}
                 <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
