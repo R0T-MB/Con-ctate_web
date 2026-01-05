@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast'; // <-- AÑADIDO: Importar toast
 import Card from '../ui/card';
 import Button from '../ui/button';
 import LanguageSelector from '../LanguageSelector';
@@ -10,8 +11,8 @@ import LanguageSelector from '../LanguageSelector';
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState(''); // <-- NUEVO ESTADO
-  const [showPassword, setShowPassword] = useState(false); // <-- NUEVO ESTADO
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   const { register } = useAuth();
@@ -22,18 +23,19 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
 
-    // <-- NUEVA VALIDACIÓN
     if (password !== passwordConfirm) {
       setError(t('register.password_mismatch'));
-      return; // Detenemos la función si las contraseñas no coinciden
+      return;
     }
     
     const result = await register(email, password);
     
     if (result.success) {
-      // Puedes redirigir a una página de "por favor, verifica tu email"
-      // o directamente al login. Por ahora, vamos al login.
-      navigate('/registration-success');
+      // <-- CAMBIO CLAVE AQUÍ
+      // 1. Muestra un toast de éxito
+      toast.success(t('register.success_message', '¡Registro exitoso! Por favor, revisa tu email para confirmar tu cuenta.'));
+      // 2. Redirige al usuario a la página de login
+      navigate('/login');
     } else {
       setError(result.error);
     }
@@ -65,14 +67,13 @@ const RegisterPage = () => {
             />
           </div>
           
-          {/* <-- CAMPO DE CONTRASEÑA MODIFICADO */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('register.password_label', 'Contraseña')}
             </label>
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'} // <-- TIPO DINÁMICO
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -82,10 +83,9 @@ const RegisterPage = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)} // <-- FUNCIÓN TOGGLE
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               >
-                {/* Ícono del ojo */}
                 {showPassword ? (
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -101,7 +101,6 @@ const RegisterPage = () => {
             </div>
           </div>
 
-          {/* <-- NUEVO CAMPO DE CONFIRMACIÓN */}
           <div>
             <label htmlFor="password-confirm" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('register.password_confirm_label', 'Confirmar Contraseña')}
@@ -131,8 +130,7 @@ const RegisterPage = () => {
         </p>
       </Card>
     </div>
-  
-);
+  );
 };
 
 export default RegisterPage;

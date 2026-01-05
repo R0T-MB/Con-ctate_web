@@ -1,4 +1,4 @@
-// src/components/AppInitializer.jsx
+// src/components/AppInitializer.jsx (VERSIÓN LIMPIA Y FINAL)
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -15,22 +15,10 @@ import LandingPage from './LandingPage';
 import MainLayout from './MainLayout';
 import TestRoute from '../TestRoute';
 import TestDestination from '../TestDestination';
-// import RegistrationSuccessPage from './auth/RegistrationSuccessPage'; <-- COMENTADO PARA LA PRUEBA
+// RegistrationSuccessPage ya no se necesita
 import ResetPasswordPage from './auth/ResetPasswordPage';
 
-// --- COMPONENTE DE PRUEBA ---
-const TestSuccessPage = () => {
-  return (
-    <div style={{ padding: '50px', textAlign: 'center', backgroundColor: 'lightblue' }}>
-      <h1>¡PÁGINA DE ÉXITO DE PRUEBA!</h1>
-      <p>Si ves esto, el enrutamiento funciona y el problema es la importación del componente original.</p>
-    </div>
-  );
-};
-// --- FIN DEL COMPONENTE DE PRUEBA ---
-
-
-// Componente para proteger rutas (sin cambios)
+// Componente para proteger rutas
 const ProtectedRoute = ({ children }) => {
     const { user, loading } = useAuth();
     if (loading) {
@@ -42,7 +30,7 @@ const ProtectedRoute = ({ children }) => {
     return children;
 };
 
-// Componente para la pantalla de carga de confirmación (sin cambios)
+// Componente para la pantalla de carga de confirmación
 const ConfirmationScreen = () => (
   <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
     <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
@@ -50,7 +38,6 @@ const ConfirmationScreen = () => (
   </div>
 );
 
-// Este componente contiene la lógica principal
 function AppContent() {
     const navigate = useNavigate();
     const [isConfirming, setIsConfirming] = useState(false);
@@ -67,7 +54,6 @@ function AppContent() {
 
             if (type === 'signup' && accessToken) {
                 const toastId = toast.loading('Confirmando tu correo electrónico...');
-
                 supabase.auth.setSession({
                     access_token: accessToken,
                     refresh_token: refreshToken,
@@ -87,7 +73,6 @@ function AppContent() {
             } else if (type === 'recovery' && accessToken) {
                 console.log('¡Enlace de recuperación detectado!');
                 const toastId = toast.loading('Verificando tu acceso...');
-                
                 supabase.auth.setSession({
                     access_token: accessToken,
                     refresh_token: refreshToken,
@@ -127,7 +112,7 @@ function AppContent() {
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/test-route" element={<TestRoute />} />
                 <Route path="/test-destination" element={<TestDestination />} />
-                <Route path="/registration-success" element={<TestSuccessPage />} /> {/* <-- CAMBIADO AQUÍ */}
+                {/* La ruta /registration-success ha sido eliminada */}
                 
                 {/* Ruta Protegida para el resto de la aplicación */}
                 <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
@@ -151,7 +136,6 @@ function AppContent() {
     );
 }
 
-// El componente principal que exportamos, ahora envuelve TODO en el proveedor
 function AppInitializer() {
     return (
         <I18nextProvider i18n={i18n}>
