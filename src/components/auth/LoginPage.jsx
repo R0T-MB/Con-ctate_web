@@ -1,11 +1,12 @@
-// src/components/auth/LoginPage.jsx (VERSIÓN DE PRUEBA "DESNUDA")
+// src/components/auth/LoginPage.jsx (PRUEBA CON CARD)
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-// NO importamos Card, Button o LanguageSelector
+import Card from '../ui/card'; // <-- AÑADIMOS LA IMPORTACIÓN DE CARD
 
 const LoginPage = () => {
+  // ... (todo el código de useState, handleSubmit, etc. se mantiene igual)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,14 +27,15 @@ const LoginPage = () => {
     }
   };
 
-  // Usamos solo HTML básico y Tailwind para estilos
+  // Reemplazamos el div principal por el componente Card
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+      <Card className="w-full max-w-md p-8"> {/* <-- USAMOS CARD AQUÍ */}
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">
           {t('login.title', 'Iniciar Sesión')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* ... el resto del formulario se mantiene igual ... */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('login.email_label', 'Email')}
@@ -77,7 +79,7 @@ const LoginPage = () => {
             {t('login.register_link', 'Regístrate aquí')}
           </Link>
         </p>
-      </div>
+      </Card> {/* <-- CIERRA CARD */}
     </div>
   );
 };
