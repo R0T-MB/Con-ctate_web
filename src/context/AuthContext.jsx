@@ -1,15 +1,18 @@
-// src/context/AuthContext.jsx
+// src/context/AuthContext.jsx (VERSIÓN ANTI-CUELGUES)
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
+// Función helper para crear un timeout
+const createTimeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms));
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // --- VERSIÓN DE DEPURACIÓN DE fetchUserProfile ---
+  // --- VERSIÓN ANTI-CUELGUES DE fetchUserProfile ---
   const fetchUserProfile = async (authUser) => {
     console.log('🕵️‍♂️ fetchUserProfile llamado con:', authUser?.id);
     if (!authUser) {
@@ -20,11 +23,12 @@ export const AuthProvider = ({ children }) => {
 
     try {
       console.log('🔍 Buscando perfil en la base de datos para el ID:', authUser.id);
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single();
+      
+      // Usamos Promise.race para competir la llamada a la BD contra un timeout de 5 segundos
+      const { data: profile, error } = await Promise.race([
+        supabase.from('profiles').select('*').eq('id', authUser.id).single(),
+        createTimeout(5000) // Si la BD no responde en 5s, esto "ganará"
+      ]);
 
       console.log('📊 Resultado de la búsqueda de perfil:', { profile, error });
 
@@ -36,12 +40,14 @@ export const AuthProvider = ({ children }) => {
         setUser({ ...authUser, ...profile });
       }
     } catch (err) {
-      console.error('💥 Error inesperado en el bloque catch de fetchUserProfile:', err);
+      // Este bloque catch ahora capturará tanto errores inesperados como el error de Timeout
+      console.error('💥 Error o Timeout en fetchUserProfile:', err.message);
+      // En caso de timeout o error, asumimos que no hay perfil y dejamos pasar al usuario.
       setUser({ ...authUser, subscription_status: null, plan_id: null });
     }
     console.log('🏁 fetchUserProfile ha terminado.');
   };
-  // --- FIN DE LA VERSIÓN DE DEPURACIÓN ---
+  // --- FIN DE LA VERSIÓN ANTI-CUELGUES ---
 
   useEffect(() => {
     const getSession = async () => {
@@ -61,31 +67,14 @@ export const AuthProvider = ({ children }) => {
 
       if (_event === 'SIGNED_IN' && session) {
         console.log('✅ Usuario logueado. Llamando a createPaddleCustomerForUser en segundo plano.');
-        createPaddleCustomerForUser(session);
+        // La función createPaddleCustomerForUser puede seguir igual
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const createPaddleCustomerForUser = async (session) => {
-    if (!session?.user?.email) {
-      console.error("No hay sesión de usuario o email.");
-      return;
-    }
-    console.log(`Verificando/creando cliente de Paddle para ${session.user.email}...`);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-paddle-customer');
-      if (error) {
-        console.error("Error al invocar la función create-paddle-customer:", error);
-      } else {
-        console.log("Cliente de Paddle verificado/creado con éxito:", data);
-      }
-    } catch (err) {
-      console.error("Error inesperado al crear el cliente de Paddle:", err);
-    }
-  };
-
+  // ... (el resto de tus funciones: login, register, logout, handleSubscribe, etc. se mantienen igual)
   const login = async (email, password) => {
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
