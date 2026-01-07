@@ -1,11 +1,11 @@
-// src/components/AppInitializer.jsx (VERSIÓN LIMPIA Y FINAL)
+// src/components/AppInitializer.jsx (VERSIÓN SIN I18NEXT PARA PRUEBA)
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import toast, { Toaster } from 'react-hot-toast';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '../i18n';
+// import { I18nextProvider } from 'react-i18next'; <-- COMENTADO
+// import i18n from '../i18n'; // <-- COMENTADO
 
 // Importa TODOS tus componentes de página
 import LoginPage from './auth/LoginPage';
@@ -15,7 +15,6 @@ import LandingPage from './LandingPage';
 import MainLayout from './MainLayout';
 import TestRoute from '../TestRoute';
 import TestDestination from '../TestDestination';
-// RegistrationSuccessPage ya no se necesita
 import ResetPasswordPage from './auth/ResetPasswordPage';
 
 // Componente para proteger rutas
@@ -112,7 +111,6 @@ function AppContent() {
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/test-route" element={<TestRoute />} />
                 <Route path="/test-destination" element={<TestDestination />} />
-                {/* La ruta /registration-success ha sido eliminada */}
                 
                 {/* Ruta Protegida para el resto de la aplicación */}
                 <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
@@ -136,9 +134,13 @@ function AppContent() {
     );
 }
 
+// El componente principal que exportamos, SIN el I18nextProvider
+// El resto del archivo se queda igual...
+
+// El componente principal que exportamos, SIN el I18nextProvider
 function AppInitializer() {
     return (
-        <I18nextProvider i18n={i18n}>
+        <> {/* <-- React Fragment para envolver los dos elementos */}
             <Router>
                 <AppContent />
             </Router>
@@ -151,8 +153,10 @@ function AppInitializer() {
                     error: { duration: 5000, iconTheme: { primary: '#ef4444', secondary: '#fff' } },
                 }}
             />
-        </I18nextProvider>
+        </> // <-- Cierra el Fragment
     );
 }
 
 export default AppInitializer;
+  
+
