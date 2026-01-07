@@ -1,14 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>conectate-proto</title>
+    <title>Conéctate</title>
+
+    <!-- SCRIPT PARA EVITAR EL FLASH DEL MODO OSCURO -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+    <!-- FIN DEL SCRIPT -->
   </head>
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
   </body>
 </html>
